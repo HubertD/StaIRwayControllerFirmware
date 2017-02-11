@@ -22,7 +22,7 @@ bool LightBarrier::UpdateStatus()
 		SetPwmEnabled(false);
 	}
 
-	_pinControlLed.Write(currentStatus != Status::CLOSED);
+	SetControlLed(currentStatus == Status::CLOSED);
 
 	if (currentStatus != _lastStatus)
 	{
@@ -54,7 +54,7 @@ bool LightBarrier::WaitForLights(bool awaitedStatus)
 
 bool LightBarrier::IsLightSeen()
 {
-	return !_pinIn.Read();
+	return _pinIn.Read();
 }
 
 void LightBarrier::SetPwmEnabled(bool isEnabled)
@@ -79,4 +79,9 @@ void LightBarrier::ResetTimeout()
 bool LightBarrier::IsTimeout()
 {
 	return HAL_GetTick() >= _tTimeout;
+}
+
+void LightBarrier::SetControlLed(bool status)
+{
+	_pinControlLed.Write(!status);
 }

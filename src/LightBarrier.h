@@ -20,6 +20,7 @@ class LightBarrier
 		Status GetStatus();
 		bool IsLightSeen();
 		void SetPwmEnabled(bool isEnabled);
+		void SetControlLed(bool status);
 
 	private:
 		static const time_ms MAX_MEASUREMENT_TIME = 5;

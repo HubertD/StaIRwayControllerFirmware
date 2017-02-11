@@ -42,6 +42,7 @@ class StaIRwayController
 		LightBarrier _lightBarrier[NUM_LIGHT_BARRIERS];
 
 		GpioPin _spiMosiPin;
+		GpioPin _spiClkPin;
 		GpioPin _ledStripOutputEnablePin[NUM_LED_STRIPS];
 		LedStrip _ledStrip[NUM_LED_STRIPS];
 

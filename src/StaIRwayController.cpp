@@ -23,6 +23,7 @@ StaIRwayController::StaIRwayController()
 		LightBarrier(_timer, 3, _lightBarrierInputPin[2], _lightBarrierControlLedPin[2])
 	},
 	_spiMosiPin(GpioPin(GPIOA, GPIO_PIN_7)),
+	_spiClkPin(GpioPin(GPIOA, GPIO_PIN_5)),
 	_ledStripOutputEnablePin {
 		GpioPin(GPIOB, GPIO_PIN_0),
 		GpioPin(GPIOB, GPIO_PIN_1),
@@ -106,6 +107,8 @@ void StaIRwayController::ConfigurePins()
 	}
 
 	_spiMosiPin.ConfigureAsPeripheralOutput(GPIO_AF0_SPI1);
+	_spiClkPin.ConfigureAsPeripheralOutput(GPIO_AF0_SPI1);
+
 	for (unsigned i=0; i<NUM_LED_STRIPS; i++)
 	{
 		_ledStripOutputEnablePin[i].ConfigureAsOutput(true);
@@ -157,8 +160,13 @@ void StaIRwayController::Run()
 	_lightBarrier[0].SetPwmEnabled(true);
 	_lightBarrier[1].SetPwmEnabled(false);
 	_lightBarrier[2].SetPwmEnabled(true);
-	while (true);
-	 */
+	while (true);*/
+/*
+	while(true) {
+		_ledStrip[2].SetAllColor(0x0000FF00);
+		_ledStrip[2].Update();
+		HAL_Delay(100);
+	} */
 
 	while (true)
 	{
@@ -180,6 +188,7 @@ void StaIRwayController::Run()
 			for (unsigned i=0; i<NUM_LIGHT_BARRIERS; i++)
 			{
 				_lightBarrier[i].UpdateStatus();
+
 				if (_lightBarrier[i].GetStatus() == LightBarrier::Status::CLOSED)
 				{
 					_ledStrip[i].SetAllColor(0xFF0000);
@@ -188,6 +197,7 @@ void StaIRwayController::Run()
 				{
 					_ledStrip[i].SetAllColor(0x00FF00);
 				}
+
 				_ledStrip[i].Update();
 			}
 		}
@@ -277,7 +287,11 @@ void StaIRwayController::UpdateBarrierStatusMessage()
 		}
 	}
 
-	_msgBarrierStatus.Msg.Data[0] = data;
+	if (_msgBarrierStatus.Msg.Data[0] != data)
+	{
+		_msgBarrierStatus.Msg.Data[0] = data;
+		_msgBarrierStatus.SendNow(HAL_GetTick());
+	}
 }
 
 void StaIRwayController::SetLed(uint8_t stripMask, uint8_t led, uint8_t r, uint8_t g, uint8_t b)
