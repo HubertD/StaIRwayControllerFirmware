@@ -99,8 +99,8 @@ void StaIRwayController::ConfigureClock()
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOF_CLK_ENABLE();
-    __HAL_RCC_TIM1_CLK_ENABLE();
-    __HAL_RCC_SPI1_CLK_ENABLE();
+	__HAL_RCC_TIM1_CLK_ENABLE();
+	__HAL_RCC_SPI1_CLK_ENABLE();
 	__HAL_RCC_CAN1_CLK_ENABLE();
 }
 
@@ -159,14 +159,8 @@ void StaIRwayController::Run()
 	{
 		time_ms now = HAL_GetTick();
 
-		_msgHeartbeat.Msg.Data[0] = (now >>  0) & 0xFF;
-		_msgHeartbeat.Msg.Data[1] = (now >>  8) & 0xFF;
-		_msgHeartbeat.Msg.Data[2] = (now >> 16) & 0xFF;
-		_msgHeartbeat.Msg.Data[3] = (now >> 24) & 0xFF;
-		_msgHeartbeat.SendIfDue(now);
-
-		UpdateBarrierStatusMessage();
-		_msgBarrierStatus.SendIfDue(now);
+		SendHeartbeatIfDue(now);
+		SendBarrierStatusIfDue(now);
 
 		ProcessCanMessages();
 
@@ -206,7 +200,7 @@ void StaIRwayController::ProcessCanMessages()
 		switch (msg.Id & 0x000000FF)
 		{
 			case CAN_ID_TRIGGER_MEASUREMENT:
-				TriggerMeasurement(msg.Data[0]);
+				UpdateBarrierStatus(msg.Data[0]);
 				break;
 			case CAN_ID_SET_LED:
 				SetLed(msg.Data[0], msg.Data[1], msg.Data[2], msg.Data[3], msg.Data[4]);
@@ -242,27 +236,38 @@ uint32_t StaIRwayController::MakeCanId(uint32_t functionId)
 	return CAN_ID_BASE | (1<<_deviceId)<<8 | functionId;
 }
 
-
-void StaIRwayController::TriggerMeasurement(uint8_t barrierMask)
+void StaIRwayController::UpdateBarrierStatus(uint8_t barrierMask)
 {
-	bool shouldSendMessage = false;
+	bool statusHasChanged = false;
 
 	for (unsigned i=0; i<NUM_LIGHT_BARRIERS; i++)
 	{
 		if ( (barrierMask & (1<<i)) != 0 )
 		{
-			if (_lightBarrier[i].UpdateStatus())
-			{
-				shouldSendMessage = true;
-			}
+			statusHasChanged |= _lightBarrier[i].UpdateStatus();
 		}
 	}
 
-	if (shouldSendMessage)
+	if (statusHasChanged)
 	{
 		UpdateBarrierStatusMessage();
 		_msgBarrierStatus.SendNow(HAL_GetTick());
 	}
+}
+
+void StaIRwayController::SendHeartbeatIfDue(time_ms now)
+{
+	_msgHeartbeat.Msg.Data[0] = (now >>  0) & 0xFF;
+	_msgHeartbeat.Msg.Data[1] = (now >>  8) & 0xFF;
+	_msgHeartbeat.Msg.Data[2] = (now >> 16) & 0xFF;
+	_msgHeartbeat.Msg.Data[3] = (now >> 24) & 0xFF;
+	_msgHeartbeat.SendIfDue(now);
+}
+
+void StaIRwayController::SendBarrierStatusIfDue(time_ms now)
+{
+	UpdateBarrierStatusMessage();
+	_msgBarrierStatus.SendIfDue(now);
 }
 
 void StaIRwayController::UpdateBarrierStatusMessage()

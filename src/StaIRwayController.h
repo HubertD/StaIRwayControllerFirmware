@@ -64,11 +64,14 @@ class StaIRwayController
 		void ProcessCanMessages();
 		uint32_t MakeCanId(uint32_t functionId);
 		bool CanIdMatchesDeviceId(uint32_t id);
-		void TriggerMeasurement(uint8_t barrierMask);
+		void UpdateBarrierStatus(uint8_t barrierMask);
 		void SetLed(uint8_t stripMask, uint8_t led, uint8_t r, uint8_t g, uint8_t b);
 		void SetAllLeds(uint8_t stripMask, uint8_t r, uint8_t g, uint8_t b);
 		void UpdateLeds(uint8_t stripMask);
 		void UpdateBarrierStatusMessage();
+
+		void SendHeartbeatIfDue(time_ms now);
+		void SendBarrierStatusIfDue(time_ms now);
 
 		uint8_t ReadDeviceId();
 		void WriteDeviceId(uint8_t device_id);
