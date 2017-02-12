@@ -18,7 +18,6 @@ class StaIRwayController
 
 		static const unsigned NUM_LIGHT_BARRIERS = 3;
 		static const unsigned NUM_LED_STRIPS = 3;
-		static const unsigned NUM_LEDS = 3;
 
 		static const uint32_t CAN_ID_BASE = CanController::CAN_ID_EXTENDED | 0x13390000;
 		static const uint32_t CAN_ID_BASE_MASK = 0xFFFF0000;
@@ -42,23 +41,29 @@ class StaIRwayController
 		static const uint8_t OPT_DEVICE_ID_MASK = 0x07;
 		static const uint8_t OPT_TIMING_MASTER_MASK = 0x80;
 
-		TIM_TypeDef *_timer;
-		GpioPin _lightBarrierOutputPin[NUM_LIGHT_BARRIERS];
-		GpioPin _lightBarrierInputPin[NUM_LIGHT_BARRIERS];
-		GpioPin _lightBarrierControlLedPin[NUM_LEDS];
-		LightBarrier _lightBarrier[NUM_LIGHT_BARRIERS];
+		TIM_TypeDef *_timer { TIM1 };
+		CanController _can { CAN };
 
-		GpioPin _spiMosiPin;
-		GpioPin _spiClkPin;
-		GpioPin _ledStripOutputEnablePin[NUM_LED_STRIPS];
-		LedStrip _ledStrip[NUM_LED_STRIPS];
+		GpioPin _spiMosiPin { GPIOA, GPIO_PIN_7 };
+		GpioPin _spiClkPin { GPIOA, GPIO_PIN_5 };
+		GpioPin _canRxPin { GPIOA, GPIO_PIN_11 };
+		GpioPin _canTxPin { GPIOA, GPIO_PIN_12 };
 
-		GpioPin _canRxPin, _canTxPin;
+		LightBarrier _lightBarrier[NUM_LIGHT_BARRIERS] {
+			{ _timer, 1, { GPIOA, GPIO_PIN_8 }, { GPIOB, GPIO_PIN_3 }, { GPIOA, GPIO_PIN_2 } },
+			{ _timer, 2, { GPIOA, GPIO_PIN_9 }, { GPIOB, GPIO_PIN_4 }, { GPIOA, GPIO_PIN_1 } },
+			{ _timer, 3, { GPIOA, GPIO_PIN_10 }, { GPIOB, GPIO_PIN_5 }, { GPIOA, GPIO_PIN_0 } },
+		};
 
-		CanController _can;
-		CyclicCanMessage _msgHeartbeat;
-		CyclicCanMessage _msgBarrierStatus;
-		CyclicCanMessage _msgTimingMaster;
+		LedStrip _ledStrip[NUM_LED_STRIPS] {
+			{ SPI1, { GPIOB, GPIO_PIN_0 } },
+			{ SPI1, { GPIOB, GPIO_PIN_1 } },
+			{ SPI1, { GPIOA, GPIO_PIN_6 } }
+		};
+
+		CyclicCanMessage _msgHeartbeat { _can, 0, 4, CAN_INTERVAL_HEARTBEAT };
+		CyclicCanMessage _msgBarrierStatus { _can, 0, 1, CAN_INTERVAL_BARRIER_STATUS };
+		CyclicCanMessage _msgTimingMaster { _can, CAN_ID_TIMING_MASTER, 1, CAN_INTERVAL_TIMING_MASTER };
 
 		unsigned _deviceId = 0;
 		bool _demoMode = true;

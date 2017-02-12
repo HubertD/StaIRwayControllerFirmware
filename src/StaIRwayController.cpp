@@ -2,45 +2,6 @@
 #include "OptionBytes.h"
 
 StaIRwayController::StaIRwayController()
-  : _timer(TIM1),
-	_lightBarrierOutputPin {
-		GpioPin(GPIOA, GPIO_PIN_8),
-		GpioPin(GPIOA, GPIO_PIN_9),
-		GpioPin(GPIOA, GPIO_PIN_10),
-	},
-	_lightBarrierInputPin {
-		GpioPin(GPIOB, GPIO_PIN_3),
-		GpioPin(GPIOB, GPIO_PIN_4),
-		GpioPin(GPIOB, GPIO_PIN_5),
-	},
-	_lightBarrierControlLedPin {
-		GpioPin(GPIOA, GPIO_PIN_2),
-		GpioPin(GPIOA, GPIO_PIN_1),
-		GpioPin(GPIOA, GPIO_PIN_0)
-	},
-	_lightBarrier {
-		LightBarrier(_timer, 1, _lightBarrierInputPin[0], _lightBarrierControlLedPin[0]),
-		LightBarrier(_timer, 2, _lightBarrierInputPin[1], _lightBarrierControlLedPin[1]),
-		LightBarrier(_timer, 3, _lightBarrierInputPin[2], _lightBarrierControlLedPin[2])
-	},
-	_spiMosiPin(GpioPin(GPIOA, GPIO_PIN_7)),
-	_spiClkPin(GpioPin(GPIOA, GPIO_PIN_5)),
-	_ledStripOutputEnablePin {
-		GpioPin(GPIOB, GPIO_PIN_0),
-		GpioPin(GPIOB, GPIO_PIN_1),
-		GpioPin(GPIOA, GPIO_PIN_6),
-	},
-	_ledStrip {
-		LedStrip(SPI1, _ledStripOutputEnablePin[0]),
-		LedStrip(SPI1, _ledStripOutputEnablePin[1]),
-		LedStrip(SPI1, _ledStripOutputEnablePin[2])
-	},
-	_canRxPin(GpioPin(GPIOA, GPIO_PIN_11)),
-	_canTxPin(GpioPin(GPIOA, GPIO_PIN_12)),
-	_can(CAN),
-	_msgHeartbeat(_can, MakeCanId(CAN_ID_HEARTBEAT), 4, CAN_INTERVAL_HEARTBEAT),
-	_msgBarrierStatus(_can, MakeCanId(CAN_ID_BARRIER_STATUS), 1, CAN_INTERVAL_BARRIER_STATUS),
-	_msgTimingMaster(_can, CAN_ID_TIMING_MASTER, 1, CAN_INTERVAL_TIMING_MASTER)
 {
 }
 
@@ -48,14 +9,14 @@ void StaIRwayController::Init()
 {
 	InitHardware();
 
-	for (unsigned i=0; i<NUM_LIGHT_BARRIERS; i++)
+	for (auto &barrier : _lightBarrier)
 	{
-		_lightBarrier[i].Init();
+		barrier.Init();
 	}
 
-	for (unsigned i=0; i<NUM_LED_STRIPS; i++)
+	for (auto &ledStrip : _ledStrip)
 	{
-		_ledStrip[i].Init();
+		ledStrip.Init();
 	}
 
 	_actAsTimingMaster = GetTimingMasterEnabledFromConfig();
@@ -111,27 +72,10 @@ void StaIRwayController::ConfigureClock()
 
 void StaIRwayController::ConfigurePins()
 {
-	for (unsigned i=0; i<NUM_LIGHT_BARRIERS; i++)
-	{
-		_lightBarrierInputPin[i].ConfigureAsInput(GPIO_PULLUP);
-		_lightBarrierOutputPin[i].ConfigureAsPeripheralOutput(GPIO_AF2_TIM1);
-	}
-
 	_spiMosiPin.ConfigureAsPeripheralOutput(GPIO_AF0_SPI1);
 	_spiClkPin.ConfigureAsPeripheralOutput(GPIO_AF0_SPI1);
-
-	for (unsigned i=0; i<NUM_LED_STRIPS; i++)
-	{
-		_ledStripOutputEnablePin[i].ConfigureAsOutput(true);
-	}
-
 	_canRxPin.ConfigureAsPeripheralOutput(GPIO_AF4_CAN);
 	_canTxPin.ConfigureAsPeripheralOutput(GPIO_AF4_CAN);
-
-	for (unsigned i=0; i<NUM_LEDS; i++)
-	{
-		_lightBarrierControlLedPin[i].ConfigureAsOutput(true);
-	}
 }
 
 void StaIRwayController::Run()

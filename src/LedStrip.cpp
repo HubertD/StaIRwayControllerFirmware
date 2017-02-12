@@ -29,6 +29,7 @@ LedStrip::LedStrip(SPI_TypeDef *spi, const GpioPin &outputEnablePin)
 
 void LedStrip::Init()
 {
+	_outputEnablePin.ConfigureAsOutput(false);
 	SetOutputEnabled(false);
 	SetAllColor(0x000000);
 	SendData();

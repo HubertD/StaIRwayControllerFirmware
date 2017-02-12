@@ -16,7 +16,7 @@ class LightBarrier
 
 		static void ConfigureTimer(TIM_TypeDef *timer);
 
-		LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinIn, const GpioPin &pinControlLed);
+		LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinOut, const GpioPin &pinIn, const GpioPin &pinControlLed);
 		void Init();
 		bool UpdateStatus();
 		Status GetStatus();
@@ -32,12 +32,14 @@ class LightBarrier
 		TIM_TypeDef* _timer;
 		unsigned _timerChannel;
 
+		GpioPin _pinOut;
 		GpioPin _pinIn;
 		GpioPin _pinControlLed;
 		time_ms _tTimeout = 0;
 
 		Status _lastStatus = Status::UNKNOWN;
 
+		void ConfigurePins();
 		bool WaitForLights(bool awaitedStatus);
 		void ResetTimeout();
 		bool IsTimeout();
