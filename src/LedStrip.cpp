@@ -7,11 +7,11 @@ void LedStrip::ConfigureSpi(SPI_TypeDef* spi)
 	hspi.Init.Mode = SPI_MODE_MASTER;
 	hspi.Init.Direction = SPI_DIRECTION_2LINES;
 	hspi.Init.DataSize = SPI_DATASIZE_12BIT;
-	//hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
-	//hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
+	hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
+	hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
 
-	hspi.Init.CLKPolarity = SPI_POLARITY_HIGH;
-	hspi.Init.CLKPhase = SPI_PHASE_2EDGE;
+	//hspi.Init.CLKPolarity = SPI_POLARITY_HIGH;
+	//hspi.Init.CLKPhase = SPI_PHASE_2EDGE;
 
 	hspi.Init.NSS = SPI_NSS_SOFT;
 	hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
@@ -70,7 +70,7 @@ void LedStrip::Update()
 
 void LedStrip::SetOutputEnabled(bool enable)
 {
-	_outputEnablePin.Write(!enable);
+	_outputEnablePin.Write(enable);
 }
 
 inline void LedStrip::WriteByte(uint8_t data)

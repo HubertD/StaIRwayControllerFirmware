@@ -19,8 +19,8 @@ class LedStrip
 		static const unsigned NUM_LEDS = 48;
 		static const unsigned BUFFER_SIZE = 3*NUM_LEDS;
 		static const time_ms T_RESET = 1;
-		static const uint16_t SPI_DATA_ONE = 0b000000001111;
-		static const uint16_t SPI_DATA_ZERO = 0b000011111111;
+		static const uint16_t SPI_DATA_ONE  = 0b011111111000;
+		static const uint16_t SPI_DATA_ZERO = 0b011110000000;
 		uint8_t _buffer[BUFFER_SIZE];
 		SPI_TypeDef *_spi;
 		GpioPin _outputEnablePin;
