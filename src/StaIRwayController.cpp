@@ -39,7 +39,8 @@ StaIRwayController::StaIRwayController()
 	_canTxPin(GpioPin(GPIOA, GPIO_PIN_12)),
 	_can(CAN),
 	_msgHeartbeat(_can, MakeCanId(CAN_ID_HEARTBEAT), 4, CAN_INTERVAL_HEARTBEAT),
-	_msgBarrierStatus(_can, MakeCanId(CAN_ID_BARRIER_STATUS), 1, CAN_INTERVAL_BARRIER_STATUS)
+	_msgBarrierStatus(_can, MakeCanId(CAN_ID_BARRIER_STATUS), 1, CAN_INTERVAL_BARRIER_STATUS),
+	_msgTimingMaster(_can, CAN_ID_TIMING_MASTER, 1, CAN_INTERVAL_TIMING_MASTER)
 {
 }
 
@@ -57,10 +58,10 @@ void StaIRwayController::Init()
 		_ledStrip[i].Init();
 	}
 
-	_deviceId = ReadDeviceId();
+	_actAsTimingMaster = GetTimingMasterEnabledFromConfig();
+	_deviceId = GetDeviceIdFromConfig();
 	_msgHeartbeat.Msg.Id = MakeCanId(CAN_ID_HEARTBEAT);
 	_msgBarrierStatus.Msg.Id = MakeCanId(CAN_ID_BARRIER_STATUS);
-
 }
 
 void StaIRwayController::InitHardware()
@@ -142,6 +143,7 @@ void StaIRwayController::Run()
 		SendHeartbeatIfDue(now);
 		SendBarrierStatusIfDue(now);
 
+		ProcessTimingMaster(now);
 		ProcessCanMessages();
 
 		if (_demoMode)
@@ -161,6 +163,20 @@ void StaIRwayController::Run()
 
 				_ledStrip[i].SendData();
 			}
+		}
+	}
+}
+
+void StaIRwayController::ProcessTimingMaster(time_ms now)
+{
+	if (_actAsTimingMaster && _msgTimingMaster.IsDue(now))
+	{
+		_msgTimingMaster.Msg.Data[0] = (1<<_timingMasterNextStep);
+		_msgTimingMaster.SendNow(now);
+
+		if (++_timingMasterNextStep >= NUM_TIMING_MASTER_STEPS)
+		{
+			_timingMasterNextStep = 0;
 		}
 	}
 }
@@ -191,8 +207,8 @@ void StaIRwayController::ProcessCanMessages()
 			case CAN_ID_UPDATE_LEDS:
 				UpdateLeds(msg.Data[0]);
 				break;
-			case CAN_ID_SET_DEVICE_ID:
-				WriteDeviceId(msg.Data[0]);
+			case CAN_ID_SET_DEVICE_CONFIG:
+				WriteDeviceConfig(msg.Data[0], msg.Data[1]!=0);
 				break;
 			default:
 				break;
@@ -304,18 +320,26 @@ void StaIRwayController::UpdateLeds(uint8_t stripMask)
 	}
 }
 
-uint8_t StaIRwayController::ReadDeviceId()
+uint8_t StaIRwayController::GetDeviceIdFromConfig()
 {
 	auto data = OptionBytes::Read();
-	uint8_t device_id = data.Data[0];
-	if (device_id>7) { device_id = 0; }
-	return device_id;
+	return (data.Data[0]==0xFF) ? DEFAULT_DEVICE_ID : data.Data[0] & OPT_DEVICE_ID_MASK;
 }
 
-void StaIRwayController::WriteDeviceId(uint8_t device_id)
+bool StaIRwayController::GetTimingMasterEnabledFromConfig()
 {
 	auto data = OptionBytes::Read();
-	data.Data[0] = device_id;
+	return (data.Data[0] != 0xFF) && ((data.Data[0] & OPT_TIMING_MASTER_MASK) != 0);
+}
+
+void StaIRwayController::WriteDeviceConfig(uint8_t device_id, bool isTimingMaster)
+{
+	auto data = OptionBytes::Read();
+	data.Data[0] = device_id & OPT_DEVICE_ID_MASK;
+	if (isTimingMaster)
+	{
+		data.Data[0] |= OPT_TIMING_MASTER_MASK;
+	}
 	OptionBytes::Write(data);
 	OptionBytes::ReloadAndReset();
 }

@@ -29,12 +29,18 @@ class StaIRwayController
 		static const uint32_t CAN_ID_SET_LED = 3;
 		static const uint32_t CAN_ID_SET_ALL_LEDS = 4;
 		static const uint32_t CAN_ID_UPDATE_LEDS = 5;
-		static const uint32_t CAN_ID_SET_DEVICE_ID = 6;
+		static const uint32_t CAN_ID_SET_DEVICE_CONFIG = 6;
 
 		static const time_ms CAN_INTERVAL_HEARTBEAT = 1000;
 		static const time_ms CAN_INTERVAL_BARRIER_STATUS = 100;
 
-		unsigned _deviceId = 0;
+		static const uint32_t CAN_ID_TIMING_MASTER = CAN_ID_BASE | 0xFF00 | CAN_ID_GET_BARRIER_STATUS;
+		static const time_ms CAN_INTERVAL_TIMING_MASTER = 10;
+		static const unsigned NUM_TIMING_MASTER_STEPS = 3;
+
+		static const uint8_t DEFAULT_DEVICE_ID = 7;
+		static const uint8_t OPT_DEVICE_ID_MASK = 0x07;
+		static const uint8_t OPT_TIMING_MASTER_MASK = 0x80;
 
 		TIM_TypeDef *_timer;
 		GpioPin _lightBarrierOutputPin[NUM_LIGHT_BARRIERS];
@@ -52,14 +58,18 @@ class StaIRwayController
 		CanController _can;
 		CyclicCanMessage _msgHeartbeat;
 		CyclicCanMessage _msgBarrierStatus;
+		CyclicCanMessage _msgTimingMaster;
 
+		unsigned _deviceId = 0;
 		bool _demoMode = true;
-
+		bool _actAsTimingMaster = false;
+		uint32_t _timingMasterNextStep = 0;
 
 		void InitHardware();
 		void ConfigureClock();
 		void ConfigurePins();
 
+		void ProcessTimingMaster(time_ms now);
 		void ProcessCanMessages();
 		uint32_t MakeCanId(uint32_t functionId);
 		bool CanIdMatchesDeviceId(uint32_t id);
@@ -72,6 +82,7 @@ class StaIRwayController
 		void SendHeartbeatIfDue(time_ms now);
 		void SendBarrierStatusIfDue(time_ms now);
 
-		uint8_t ReadDeviceId();
-		void WriteDeviceId(uint8_t device_id);
+		uint8_t GetDeviceIdFromConfig();
+		bool GetTimingMasterEnabledFromConfig();
+		void WriteDeviceConfig(uint8_t device_id, bool isTimingMaster);
 };
