@@ -1,4 +1,5 @@
 #include "StaIRwayController.h"
+#include "OptionBytes.h"
 
 StaIRwayController::StaIRwayController()
   : _timer(TIM1),
@@ -55,6 +56,11 @@ void StaIRwayController::Init()
 	{
 		_ledStrip[i].Init();
 	}
+
+	_deviceId = ReadDeviceId();
+	_msgHeartbeat.Msg.Id = MakeCanId(CAN_ID_HEARTBEAT);
+	_msgBarrierStatus.Msg.Id = MakeCanId(CAN_ID_MEASUREMENT_RESULT);
+
 }
 
 void StaIRwayController::InitHardware()
@@ -149,25 +155,6 @@ void StaIRwayController::ConfigureTimer()
 
 void StaIRwayController::Run()
 {
-/*	_lightBarrierOutputPin[0].ConfigureAsOutput(true);
-	while (true)
-	{
-		_lightBarrierOutputPin[0].Write(true);
-		_lightBarrierOutputPin[0].Write(false);
-	} */
-
-	/*
-	_lightBarrier[0].SetPwmEnabled(true);
-	_lightBarrier[1].SetPwmEnabled(false);
-	_lightBarrier[2].SetPwmEnabled(true);
-	while (true);*/
-/*
-	while(true) {
-		_ledStrip[2].SetAllColor(0x0000FF00);
-		_ledStrip[2].Update();
-		HAL_Delay(100);
-	} */
-
 	while (true)
 	{
 		time_ms now = HAL_GetTick();
@@ -230,6 +217,9 @@ void StaIRwayController::ProcessCanMessages()
 			case CAN_ID_UPDATE_LEDS:
 				UpdateLeds(msg.Data[0]);
 				break;
+			case CAN_ID_SET_DEVICE_ID:
+				WriteDeviceId(msg.Data[0]);
+				break;
 			default:
 				break;
 		}
@@ -249,7 +239,7 @@ bool StaIRwayController::CanIdMatchesDeviceId(uint32_t id)
 
 uint32_t StaIRwayController::MakeCanId(uint32_t functionId)
 {
-	return CAN_ID_BASE | (_deviceId<<8) | functionId;
+	return CAN_ID_BASE | (1<<_deviceId)<<8 | functionId;
 }
 
 
@@ -329,3 +319,18 @@ void StaIRwayController::UpdateLeds(uint8_t stripMask)
 	}
 }
 
+uint8_t StaIRwayController::ReadDeviceId()
+{
+	auto data = OptionBytes::Read();
+	uint8_t device_id = data.Data[0];
+	if (device_id>7) { device_id = 0; }
+	return device_id;
+}
+
+void StaIRwayController::WriteDeviceId(uint8_t device_id)
+{
+	auto data = OptionBytes::Read();
+	data.Data[0] = device_id;
+	OptionBytes::Write(data);
+	OptionBytes::ReloadAndReset();
+}

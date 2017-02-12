@@ -32,8 +32,9 @@ class StaIRwayController
 		static const uint32_t CAN_ID_SET_LED = 3;
 		static const uint32_t CAN_ID_SET_ALL_LEDS = 4;
 		static const uint32_t CAN_ID_UPDATE_LEDS = 5;
+		static const uint32_t CAN_ID_SET_DEVICE_ID = 6;
 
-		unsigned _deviceId = 0; // todo load/save from flash
+		unsigned _deviceId = 0;
 
 		TIM_TypeDef *_timer;
 		GpioPin _lightBarrierOutputPin[NUM_LIGHT_BARRIERS];
@@ -68,4 +69,7 @@ class StaIRwayController
 		void SetAllLeds(uint8_t stripMask, uint8_t r, uint8_t g, uint8_t b);
 		void UpdateLeds(uint8_t stripMask);
 		void UpdateBarrierStatusMessage();
+
+		uint8_t ReadDeviceId();
+		void WriteDeviceId(uint8_t device_id);
 };
