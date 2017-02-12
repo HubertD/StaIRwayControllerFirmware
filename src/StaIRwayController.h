@@ -24,12 +24,15 @@ class StaIRwayController
 		static const uint32_t CAN_ID_BASE_MASK = 0xFFFF0000;
 
 		static const uint32_t CAN_ID_HEARTBEAT = 0;
-		static const uint32_t CAN_ID_TRIGGER_MEASUREMENT = 1;
-		static const uint32_t CAN_ID_MEASUREMENT_RESULT = 2;
+		static const uint32_t CAN_ID_GET_BARRIER_STATUS = 1;
+		static const uint32_t CAN_ID_BARRIER_STATUS = 2;
 		static const uint32_t CAN_ID_SET_LED = 3;
 		static const uint32_t CAN_ID_SET_ALL_LEDS = 4;
 		static const uint32_t CAN_ID_UPDATE_LEDS = 5;
 		static const uint32_t CAN_ID_SET_DEVICE_ID = 6;
+
+		static const time_ms CAN_INTERVAL_HEARTBEAT = 1000;
+		static const time_ms CAN_INTERVAL_BARRIER_STATUS = 100;
 
 		unsigned _deviceId = 0;
 

@@ -38,8 +38,8 @@ StaIRwayController::StaIRwayController()
 	_canRxPin(GpioPin(GPIOA, GPIO_PIN_11)),
 	_canTxPin(GpioPin(GPIOA, GPIO_PIN_12)),
 	_can(CAN),
-	_msgHeartbeat(_can, MakeCanId(CAN_ID_HEARTBEAT), 4, 1000),
-	_msgBarrierStatus(_can, MakeCanId(CAN_ID_MEASUREMENT_RESULT), 1, 1000)
+	_msgHeartbeat(_can, MakeCanId(CAN_ID_HEARTBEAT), 4, CAN_INTERVAL_HEARTBEAT),
+	_msgBarrierStatus(_can, MakeCanId(CAN_ID_BARRIER_STATUS), 1, CAN_INTERVAL_BARRIER_STATUS)
 {
 }
 
@@ -59,7 +59,7 @@ void StaIRwayController::Init()
 
 	_deviceId = ReadDeviceId();
 	_msgHeartbeat.Msg.Id = MakeCanId(CAN_ID_HEARTBEAT);
-	_msgBarrierStatus.Msg.Id = MakeCanId(CAN_ID_MEASUREMENT_RESULT);
+	_msgBarrierStatus.Msg.Id = MakeCanId(CAN_ID_BARRIER_STATUS);
 
 }
 
@@ -179,7 +179,7 @@ void StaIRwayController::ProcessCanMessages()
 
 		switch (msg.Id & 0x000000FF)
 		{
-			case CAN_ID_TRIGGER_MEASUREMENT:
+			case CAN_ID_GET_BARRIER_STATUS:
 				UpdateBarrierStatus(msg.Data[0]);
 				break;
 			case CAN_ID_SET_LED:
