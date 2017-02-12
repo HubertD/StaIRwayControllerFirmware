@@ -183,7 +183,7 @@ void StaIRwayController::Run()
 					_ledStrip[i].SetAllColor(0x00FF00);
 				}
 
-				_ledStrip[i].Update();
+				_ledStrip[i].SendData();
 			}
 		}
 	}
@@ -323,7 +323,7 @@ void StaIRwayController::UpdateLeds(uint8_t stripMask)
 	{
 		if ( (stripMask & (1<<i)) != 0 )
 		{
-			_ledStrip[i].Update();
+			_ledStrip[i].SendData();
 		}
 	}
 }

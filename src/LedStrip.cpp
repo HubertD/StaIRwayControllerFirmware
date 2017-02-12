@@ -9,10 +9,6 @@ void LedStrip::ConfigureSpi(SPI_TypeDef* spi)
 	hspi.Init.DataSize = SPI_DATASIZE_12BIT;
 	hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
 	hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
-
-	//hspi.Init.CLKPolarity = SPI_POLARITY_HIGH;
-	//hspi.Init.CLKPhase = SPI_PHASE_2EDGE;
-
 	hspi.Init.NSS = SPI_NSS_SOFT;
 	hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
 	hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
@@ -35,7 +31,7 @@ void LedStrip::Init()
 {
 	SetOutputEnabled(false);
 	SetAllColor(0x000000);
-	Update();
+	SendData();
 }
 
 void LedStrip::SetAllColor(uint32_t color)
@@ -56,7 +52,7 @@ void LedStrip::SetLedColor(unsigned led, uint32_t color)
 	}
 }
 
-void LedStrip::Update()
+void LedStrip::SendData()
 {
 	SetOutputEnabled(true);
 	for (unsigned i=0; i<BUFFER_SIZE; i++)

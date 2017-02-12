@@ -10,7 +10,7 @@ class LedStrip
 		void Init();
 		void SetLedColor(unsigned led, uint32_t color);
 		void SetAllColor(uint32_t color);
-		void Update();
+		void SendData();
 
 		static void ConfigureSpi(SPI_TypeDef *spi);
 		static uint32_t MakeColor(uint8_t r, uint8_t g, uint8_t b);
