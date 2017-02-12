@@ -20,9 +20,6 @@ class StaIRwayController
 		static const unsigned NUM_LED_STRIPS = 3;
 		static const unsigned NUM_LEDS = 3;
 
-		static const uint16_t TIMER_PRESCALE = 125;
-		static const uint16_t TIMER_INTERVAL = 10;
-
 		static const uint32_t CAN_ID_BASE = CanController::CAN_ID_EXTENDED | 0x13390000;
 		static const uint32_t CAN_ID_BASE_MASK = 0xFFFF0000;
 
@@ -59,7 +56,6 @@ class StaIRwayController
 		void InitHardware();
 		void ConfigureClock();
 		void ConfigurePins();
-		void ConfigureTimer();
 
 		void ProcessCanMessages();
 		uint32_t MakeCanId(uint32_t functionId);

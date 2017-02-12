@@ -14,6 +14,8 @@ class LightBarrier
 			TIMEOUT
 		};
 
+		static void ConfigureTimer(TIM_TypeDef *timer);
+
 		LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinIn, const GpioPin &pinControlLed);
 		void Init();
 		bool UpdateStatus();
@@ -23,6 +25,8 @@ class LightBarrier
 		void SetControlLed(bool status);
 
 	private:
+		static const uint16_t TIMER_PRESCALE = 125;
+		static const uint16_t TIMER_INTERVAL = 10;
 		static const time_ms MAX_MEASUREMENT_TIME = 5;
 
 		TIM_TypeDef* _timer;
@@ -35,8 +39,6 @@ class LightBarrier
 		Status _lastStatus = Status::UNKNOWN;
 
 		bool WaitForLights(bool awaitedStatus);
-
-
 		void ResetTimeout();
 		bool IsTimeout();
 };

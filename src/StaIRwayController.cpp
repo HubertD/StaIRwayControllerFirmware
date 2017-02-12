@@ -67,9 +67,9 @@ void StaIRwayController::InitHardware()
 {
 	HAL_Init();
 	ConfigureClock();
-	ConfigureTimer();
-	ConfigurePins();
+	LightBarrier::ConfigureTimer(_timer);
 	LedStrip::ConfigureSpi(SPI1);
+	ConfigurePins();
 	_can.Configure(6, 13, 2, 1, false, false, false);
 }
 
@@ -131,30 +131,6 @@ void StaIRwayController::ConfigurePins()
 	{
 		_lightBarrierControlLedPin[i].ConfigureAsOutput(true);
 	}
-}
-
-void StaIRwayController::ConfigureTimer()
-{
-	_timer->PSC = TIMER_PRESCALE;
-
-	/* set timer interval */
-	_timer->ARR = TIMER_INTERVAL-1;
-
-	/* set pulse width to 50% */
-	_timer->CCR1 = TIMER_INTERVAL/2;
-	_timer->CCR2 = TIMER_INTERVAL/2;
-	_timer->CCR3 = TIMER_INTERVAL/2;
-
-	/* configure channels to PWM mode 1 */
-	_timer->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
-	_timer->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2;
-	_timer->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
-
-	/* set master output enable */
-	_timer->BDTR |= TIM_BDTR_MOE;
-
-	/* enable timer */
-	_timer->CR1 = TIM_CR1_CEN;
 }
 
 void StaIRwayController::Run()
