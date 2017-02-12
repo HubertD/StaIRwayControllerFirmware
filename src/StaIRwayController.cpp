@@ -75,6 +75,8 @@ void StaIRwayController::InitHardware()
 
 void StaIRwayController::ConfigureClock()
 {
+	__HAL_RCC_SYSCFG_CLK_ENABLE();
+
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -94,6 +96,8 @@ void StaIRwayController::ConfigureClock()
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
+	HAL_NVIC_SetPriority(SVC_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
