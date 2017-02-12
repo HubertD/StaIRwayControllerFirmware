@@ -16,7 +16,7 @@ class LightBarrier
 
 		static void ConfigureTimer(TIM_TypeDef *timer);
 
-		LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinOut, const GpioPin &pinIn, const GpioPin &pinControlLed);
+		LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinOut, const uint8_t pinOutAF, const GpioPin &pinIn, const GpioPin &pinControlLed);
 		void Init();
 		bool UpdateStatus();
 		Status GetStatus();
@@ -33,6 +33,7 @@ class LightBarrier
 		unsigned _timerChannel;
 
 		GpioPin _pinOut;
+		uint8_t _pinOutAF;
 		GpioPin _pinIn;
 		GpioPin _pinControlLed;
 		time_ms _tTimeout = 0;

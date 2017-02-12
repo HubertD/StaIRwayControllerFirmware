@@ -50,9 +50,9 @@ class StaIRwayController
 		GpioPin _canTxPin { GPIOA, GPIO_PIN_12 };
 
 		LightBarrier _lightBarrier[NUM_LIGHT_BARRIERS] {
-			{ _timer, 1, { GPIOA, GPIO_PIN_8 }, { GPIOB, GPIO_PIN_3 }, { GPIOA, GPIO_PIN_2 } },
-			{ _timer, 2, { GPIOA, GPIO_PIN_9 }, { GPIOB, GPIO_PIN_4 }, { GPIOA, GPIO_PIN_1 } },
-			{ _timer, 3, { GPIOA, GPIO_PIN_10 }, { GPIOB, GPIO_PIN_5 }, { GPIOA, GPIO_PIN_0 } },
+			{ _timer, 1, { GPIOA, GPIO_PIN_8 }, GPIO_AF2_TIM1, { GPIOB, GPIO_PIN_3 }, { GPIOA, GPIO_PIN_2 } },
+			{ _timer, 2, { GPIOA, GPIO_PIN_9 }, GPIO_AF2_TIM1, { GPIOB, GPIO_PIN_4 }, { GPIOA, GPIO_PIN_1 } },
+			{ _timer, 3, { GPIOA, GPIO_PIN_10 }, GPIO_AF2_TIM1, { GPIOB, GPIO_PIN_5 }, { GPIOA, GPIO_PIN_0 } },
 		};
 
 		LedStrip _ledStrip[NUM_LED_STRIPS] {

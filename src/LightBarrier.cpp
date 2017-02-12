@@ -25,8 +25,8 @@ void LightBarrier::ConfigureTimer(TIM_TypeDef* timer)
 	timer->CR1 = TIM_CR1_CEN;
 }
 
-LightBarrier::LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinOut, const GpioPin& pinIn, const GpioPin &pinControlLed)
-  : _timer(timer), _timerChannel(timerChannel), _pinOut(pinOut), _pinIn(pinIn), _pinControlLed(pinControlLed)
+LightBarrier::LightBarrier(TIM_TypeDef* timer, unsigned timerChannel, const GpioPin &pinOut, const uint8_t pinOutAF, const GpioPin& pinIn, const GpioPin &pinControlLed)
+  : _timer(timer), _timerChannel(timerChannel), _pinOut(pinOut), _pinOutAF(pinOutAF), _pinIn(pinIn), _pinControlLed(pinControlLed)
 {
 }
 
@@ -40,7 +40,7 @@ void LightBarrier::ConfigurePins()
 {
 	_pinIn.ConfigureAsInput(GPIO_PULLUP);
 	_pinControlLed.ConfigureAsOutput(true);
-	_pinOut.ConfigureAsPeripheralOutput(GPIO_AF2_TIM1);
+	_pinOut.ConfigureAsPeripheralOutput(_pinOutAF);
 }
 
 bool LightBarrier::UpdateStatus()
